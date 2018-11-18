@@ -43,8 +43,9 @@ router.post('/', async (req, res) => {
       newUserData.adult = true
     }
     const saltRounds = 10
-    newUserData.password = await bcrypt.hash(newUserData.password, saltRounds)
+    newUserData.passwordHash = await bcrypt.hash(newUserData.password, saltRounds)
 
+    console.log(newUserData)
     const user = new User(newUserData)
     const result = await user.save()
     res.status(201).json(User.format(result))
