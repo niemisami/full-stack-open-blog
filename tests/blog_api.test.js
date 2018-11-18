@@ -2,11 +2,12 @@ const supertest = require('supertest')
 const { app, server } = require('../index')
 const api = supertest(app)
 const Blog = require('../models/blog')
-const { initialBlogs, nonExistingId, blogsInDb } = require('./test_helper')
+const User = require('../models/user')
+const { initialBlogs, nonExistingId, blogsInDb, initialUsers, usersInDb } = require('./test_helper')
 
-describe('when there is initially data in db', () => {
+describe('when there is initially blog data in db', async () => {
   beforeAll(async () => {
-    await Blog.remove({})
+    await Blog.deleteMany({})
     const blogObjects = initialBlogs.map(n => new Blog(n))
     await Promise.all(blogObjects.map(n => n.save()))
   })
@@ -35,7 +36,7 @@ describe('when there is initially data in db', () => {
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
-    expect(response.body).toEqual(Blog.format(blog))
+    expect(response.body.title).toEqual(Blog.format(blog).title)
   })
 
   test('404 returned by GET /api/blogs/:id with nonexisting valid id', async () => {
@@ -143,6 +144,96 @@ describe('when there is initially data in db', () => {
 
       expect(titles).not.toContain(addedBlog.title)
       expect(blogsAfterOperation.length).toBe(blogsAtStart.length - 1)
+    })
+  })
+
+  describe('when there is initially user data in db', async () => {
+    beforeAll(async () => {
+      await User.deleteMany({})
+      const userObjects = initialUsers.map(n => new User(n))
+      await Promise.all(userObjects.map(n => n.save()))
+    })
+
+    test('all users are returned as json by GET /api/users', async () => {
+      const usersInDatabase = await usersInDb()
+      const response = await api
+        .get('/api/users')
+        .expect('Content-Type', /application\/json/)
+        .expect(200)
+
+      expect(response.body.length).toBe(usersInDatabase.length)
+
+      const returnedUsers = response.body.map(user => user.title)
+      usersInDatabase.forEach(user => {
+        expect(returnedUsers).toContain(user.title)
+      })
+    })
+
+    test('individual users are returned as json by GET /api/users/:id', async () => {
+      const usersInDatabase = await usersInDb()
+      const user = usersInDatabase[0]
+
+      const response = await api
+        .get(`/api/users/${user.id}`)
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+
+      expect(response.body.username).toEqual(User.format(user).username)
+    })
+
+    test('404 returned by GET /api/users/:id with nonexisting valid id', async () => {
+      const validNonexistingId = await nonExistingId()
+      await api
+        .get(`/api/users/${validNonexistingId}`)
+        .expect(404)
+    })
+
+    test('400 is returned by GET /api/users/:id with invalid id', async () => {
+      const invalidId = '5a3d5da59070081a82a3445'
+      await api
+        .get(`/api/users/${invalidId}`)
+        .expect(400)
+    })
+
+    describe('addition of a new user', async () => {
+      test('POST /api/users succeeds with valid data', async () => {
+        const usersAtStart = await usersInDb()
+
+        const newUser = {
+          username: 'newuser',
+          password: 'newuser1',
+          name: 'New User',
+          adult: false,
+        }
+        await api
+          .post('/api/users')
+          .send(newUser)
+          .expect(201)
+          .expect('Content-Type', /application\/json/)
+
+        const usersAfterOperation = await usersInDb()
+        expect(usersAfterOperation.length).toBe(usersAtStart.length + 1)
+        const titles = usersAfterOperation.map(user => user.title)
+        expect(titles).toContain(newUser.title)
+      })
+
+      test('POST /api/users fails with proper statuscode if password is too short', async () => {
+        const usersAtStart = await usersInDb()
+
+        const newUser = {
+          username: 'newuser',
+          password: 'nu',
+          name: 'New User',
+          adult: false,
+        }
+        await api
+          .post('/api/users')
+          .send(newUser)
+          .expect(400)
+
+        const usersAfterOperation = await usersInDb()
+        expect(usersAfterOperation.length).toBe(usersAtStart.length)
+      })
     })
   })
 
