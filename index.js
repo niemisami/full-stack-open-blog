@@ -1,9 +1,13 @@
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 const http = require('http')
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const mongoose = require('mongoose')
+const morgan = require('morgan')
 const loginRouter = require('./controllers/login')
 const blogRouter = require('./controllers/blogs')
 const usersRouter = require('./controllers/users')
@@ -21,6 +25,7 @@ mongoose
 
 app.use(cors())
 app.use(bodyParser.json())
+app.use(morgan('tiny'))
 
 app.use(middleware.authorization)
 app.use('/api/login', loginRouter)

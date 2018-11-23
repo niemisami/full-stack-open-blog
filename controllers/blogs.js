@@ -46,6 +46,7 @@ router.post('/', async (req, res) => {
     newBlogData.user = decodedToken.id
     const blog = new Blog(newBlogData)
     const result = await blog.save()
+      .populate('user', { username: 1, name: 1 })
 
     const user = await User.findById(decodedToken.id)
     user.blogs = user.blogs.concat(result._id)
@@ -83,14 +84,16 @@ router.delete('/:id', async (req, res) => {
     const token = req.token
     const decodedToken = jwt.verify(token, process.env.SECRET)
 
-    if(!token || !decodedToken.id) {
+    const blog = await Blog.findById(req.params.id)
+
+    if(blog.user && blog.user.toString() !== decodedToken.id) {
+      return res.status(401).json({ error: 'not allowed to remove blog' })
+    }
+
+    if(blog.user && (!token || !decodedToken.id)) {
       return res.status(401).json({ error: 'token missing or invalid' })
     }
 
-    const blog = await Blog.findById(req.params.id)
-    if(blog.user.toString() !== decodedToken.id) {
-      return res.status(401).json({ error: 'not allowed to remove blog' })
-    }
     await Blog.findByIdAndRemove(req.params.id)
     res.status(204).end()
   } catch(error) {
