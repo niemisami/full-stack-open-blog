@@ -3,8 +3,8 @@ const router = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
 
-
 router.get('/', async (req, res) => {
+
   const blogs = await Blog.find({})
     .populate('user', { username: 1, name: 1 })
   res.json(blogs.map(blog => Blog.format(blog)))
@@ -28,13 +28,6 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const token = req.token
-    const decodedToken = jwt.verify(token, process.env.SECRET)
-
-    if(!token || !decodedToken.id) {
-      return res.status(401).json({ error: 'token missing or invalid' })
-    }
-
     const newBlogData = req.body
     if(!newBlogData.title || !newBlogData.url) {
       return res.status(400).json({ error: 'content missing' })
@@ -43,12 +36,12 @@ router.post('/', async (req, res) => {
     if(!newBlogData.likes) {
       newBlogData.likes = 0
     }
-    newBlogData.user = decodedToken.id
+    newBlogData.user = req.userId
     const blog = new Blog(newBlogData)
-    const result = await blog.save()
+    const result = (await blog.save())
       .populate('user', { username: 1, name: 1 })
 
-    const user = await User.findById(decodedToken.id)
+    const user = await User.findById(req.userId)
     user.blogs = user.blogs.concat(result._id)
     await user.save()
 
@@ -86,11 +79,11 @@ router.delete('/:id', async (req, res) => {
 
     const blog = await Blog.findById(req.params.id)
 
-    if(blog.user && blog.user.toString() !== decodedToken.id) {
+    if(blog.user && blog.user.toString() !== req.userId) {
       return res.status(401).json({ error: 'not allowed to remove blog' })
     }
 
-    if(blog.user && (!token || !decodedToken.id)) {
+    if(blog.user && (!token || !req.userId)) {
       return res.status(401).json({ error: 'token missing or invalid' })
     }
 

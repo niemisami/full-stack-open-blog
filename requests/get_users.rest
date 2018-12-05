@@ -1,0 +1,2 @@
+GET http://localhost:3033/api/users
+content-type: application/json

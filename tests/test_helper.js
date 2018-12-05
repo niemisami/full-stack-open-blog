@@ -1,5 +1,6 @@
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const { generateJwtToken } = require('../helpers')
 
 const initialBlogs = [
   {
@@ -81,6 +82,8 @@ const initialUsers = [
   }
 ]
 
+const dummyAuthToken = () => generateJwtToken({ id: initialUsers[0]._id })
+
 const usersInDb = async () => {
   const users = await User.find({})
   return users
@@ -91,5 +94,6 @@ module.exports = {
   nonExistingId,
   blogsInDb,
   initialUsers,
-  usersInDb
+  usersInDb,
+  dummyAuthToken
 }

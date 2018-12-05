@@ -29,7 +29,7 @@ app.use(morgan('tiny'))
 
 app.use(middleware.authorization)
 app.use('/api/login', loginRouter)
-app.use('/api/blogs', blogRouter)
+app.use('/api/blogs', middleware.requireAuthentication, blogRouter)
 app.use('/api/users', usersRouter)
 
 const server = http.createServer(app)

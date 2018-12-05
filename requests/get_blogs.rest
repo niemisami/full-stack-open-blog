@@ -1,2 +1,2 @@
-GET http://localhost:3033/api/users
+GET http://localhost:3033/api/blogs
 content-type: application/json
