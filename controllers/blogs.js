@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken')
 const router = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const commentsRouter = require('./comments')
 
 router.get('/', async (req, res) => {
 
@@ -26,6 +26,8 @@ router.get('/:id', async (req, res) => {
   }
 })
 
+router.use('/:id/comments', commentsRouter)
+
 router.post('/', async (req, res) => {
   try {
     const newBlogData = req.body
@@ -38,13 +40,13 @@ router.post('/', async (req, res) => {
     }
     newBlogData.user = req.userId
     const blog = new Blog(newBlogData)
-    const result = (await blog.save())
-      .populate('user', { username: 1, name: 1 })
+    const result = await blog.save()
 
     const user = await User.findById(req.userId)
     user.blogs = user.blogs.concat(result._id)
     await user.save()
 
+    blog.user = user
     res.status(201).json(Blog.format(result))
 
   } catch(error) {
@@ -75,7 +77,6 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const token = req.token
-    const decodedToken = jwt.verify(token, process.env.SECRET)
 
     const blog = await Blog.findById(req.params.id)
 
