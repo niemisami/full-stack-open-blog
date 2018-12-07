@@ -1,4 +1,4 @@
-if (process.env.NODE_ENV !== 'production') {
+if(process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const http = require('http')
@@ -27,10 +27,13 @@ app.use(cors())
 app.use(bodyParser.json())
 app.use(morgan('tiny'))
 
+
 app.use(middleware.authorization)
 app.use('/api/login', loginRouter)
 app.use('/api/blogs', middleware.requireAuthentication, blogRouter)
 app.use('/api/users', usersRouter)
+
+app.use(express.static('build'))
 
 const server = http.createServer(app)
 
