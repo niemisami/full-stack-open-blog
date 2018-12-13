@@ -3,7 +3,8 @@ const { app, server } = require('../index')
 const api = supertest(app)
 const Blog = require('../models/blog')
 const User = require('../models/user')
-const { initialBlogs, nonExistingId, blogsInDb, initialUsers, usersInDb, dummyAuthToken } = require('./test_helper')
+const { initialBlogs, nonExistingId, blogsInDb } = require('./blog_helper')
+const { initialUsers, usersInDb, dummyAuthToken } = require('./user_helper')
 
 describe('when there is initially blog data in db', async () => {
   beforeAll(async () => {
@@ -31,8 +32,8 @@ describe('when there is initially blog data in db', async () => {
       let authToken
       beforeAll(async () => {
         authToken = 'Bearer ' + dummyAuthToken()
-
       })
+
       test('all blogs are returned as json by GET /api/blogs', async () => {
         const blogsInDatabase = await blogsInDb()
         const response = await api
