@@ -1,15 +1,19 @@
 language: node_js
 node_js:
-  - "10"
-
+- '10'
 cache:
   directories:
-    - "node_modules"
-
+  - node_modules
 notifications:
   email:
     recipients:
     - sami@nieminen.fi
     on_success: change
     on_failure: always
-
+deploy:
+  provider: heroku
+  api_key:
+    secure: TvVvSnOKxOh8TPeogqFFovUGqVglGXCVqeOfx5qIsdijcB1EzdWgatCuh/LCWjylompjIhkzD+seEJlFsX5EuFg2VwSeFyscYiCKqQN0jpR+dYkwI/HTwDacCVAcBGEO7v46GK6zOJ13lva7MyXyiZNJVK7rt/hbtsQ0BhQw8UGOi3Zo717jpxJ4mn7LVkd+HgS8wX/aRFBQsmg4Jbf63eIi6HnOm6EtcTYaEjOwfvqlJa5WPwewlAe0sKqwqoI8yeWp7e6BV6ITEzbNG5R6LoIhKo/iHd9m6rkG4q1P4WWE6faWivjetNezJCpqyITzgAoyZBZ23CaVzAAPKkySB7UwUVlvgIU3vCPtAxKATZvOwPENsScrNtMr9wtLHMrUD+3TwRUAR8QrR4k4DMrPcVwOTrvo0tqoxwFHoU1GbcQXxsHiC87mx32CfCMiQpa4VmP5Yc4W7DKc/y7SPNtVYf7jhpj1Ab5w8WzTsMai1cWkBavvSIWdRsneuCuXJZGDC6+k6/cD+NjxmmQXz/usGNpTT1Fvsgqkc8SS3WmXIW7U0FjJ8D913nQOIBRAhlVfvLhCdd4oue3kobxepmnsJRpn76JkQhV0ng5n0gPyotUrTyYY7Amdv3E9DSFPTQsvLxY2mzsGw4fnG02gfC4cq9tV2nq4giWYNYJZYVSKQPY=
+  app: full-stack-blog-app
+  on:
+    repo: niemisami/full-stack-open-blog
